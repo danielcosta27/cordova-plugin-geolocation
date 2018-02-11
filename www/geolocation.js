@@ -205,6 +205,13 @@ var geolocation = {
             timers[id].timer = false;
             exec(null, null, 'Geolocation', 'clearWatch', [id]);
         }
+    },
+    /**
+     * Requests Location Authorization
+     *
+     */
+    requestLocationAuthorization: function () {
+        exec(null, null, 'Geolocation', 'requestLocationAuthorization', []);
     }
 };
 

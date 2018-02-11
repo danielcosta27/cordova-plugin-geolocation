@@ -62,6 +62,39 @@
     self.locationData = nil;
 }
 
+- (void) requestLocationAuthorization: (CDVInvokedUrlCommand*)command
+{
+    [self.commandDelegate runInBackground:^{
+        @try {
+            if ([CLLocationManager instancesRespondToSelector:@selector(requestWhenInUseAuthorization)])
+            {
+                BOOL always = [[command argumentAtIndex:0] boolValue];
+                if(always){
+                    NSAssert([[[NSBundle mainBundle] infoDictionary] valueForKey:@"NSLocationAlwaysUsageDescription"], @"For iOS 8 and above, your app must have a value for NSLocationAlwaysUsageDescription in its Info.plist");
+                    [self.locationManager requestAlwaysAuthorization];
+                    [self logDebug:@"Requesting location authorization: always"];
+                }else{
+                    NSAssert([[[NSBundle mainBundle] infoDictionary] valueForKey:@"NSLocationWhenInUseUsageDescription"], @"For iOS 8 and above, your app must have a value for NSLocationWhenInUseUsageDescription in its Info.plist");
+                    [self.locationManager requestWhenInUseAuthorization];
+                    [self logDebug:@"Requesting location authorization: when in use"];
+                }
+            }
+        }
+        @catch (NSException *exception) {
+            NSMutableDictionary* posError = [NSMutableDictionary dictionaryWithCapacity:2];
+            [posError setObject:[NSNumber numberWithInt:PERMISSIONDENIED] forKey:@"code"];
+            [posError setObject:@"Not possible to request permission to Location services." forKey:@"message"];
+            CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:posError];
+            [self.commandDelegate sendPluginResult:result callbackId:callbackId];
+        }
+        self.locationRequestCallbackId = command.callbackId;
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+        [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
+
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:locationRequestCallbackId];
+    }];
+}
+
 - (BOOL)isAuthorized
 {
     BOOL authorizationStatusClassPropertyAvailable = [CLLocationManager respondsToSelector:@selector(authorizationStatus)]; // iOS 4.2+

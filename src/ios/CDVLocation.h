@@ -52,6 +52,7 @@ typedef NSUInteger CDVLocationStatus;
 @property (nonatomic, strong) CLLocationManager* locationManager;
 @property (nonatomic, strong) CDVLocationData* locationData;
 
+- (void)requestLocationAuthorization: (CDVInvokedUrlCommand*)command;
 - (void)getLocation:(CDVInvokedUrlCommand*)command;
 - (void)addWatch:(CDVInvokedUrlCommand*)command;
 - (void)clearWatch:(CDVInvokedUrlCommand*)command;
