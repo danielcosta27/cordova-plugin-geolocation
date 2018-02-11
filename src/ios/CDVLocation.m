@@ -65,6 +65,7 @@
 - (void) requestLocationAuthorization: (CDVInvokedUrlCommand*)command
 {
     [self.commandDelegate runInBackground:^{
+        NSString* callbackId = command.callbackId;
         @try {
             if ([CLLocationManager instancesRespondToSelector:@selector(requestWhenInUseAuthorization)])
             {
@@ -72,11 +73,11 @@
                 if(always){
                     NSAssert([[[NSBundle mainBundle] infoDictionary] valueForKey:@"NSLocationAlwaysUsageDescription"], @"For iOS 8 and above, your app must have a value for NSLocationAlwaysUsageDescription in its Info.plist");
                     [self.locationManager requestAlwaysAuthorization];
-                    [self logDebug:@"Requesting location authorization: always"];
+                    NSLog(@"Requesting location authorization: always");
                 }else{
                     NSAssert([[[NSBundle mainBundle] infoDictionary] valueForKey:@"NSLocationWhenInUseUsageDescription"], @"For iOS 8 and above, your app must have a value for NSLocationWhenInUseUsageDescription in its Info.plist");
                     [self.locationManager requestWhenInUseAuthorization];
-                    [self logDebug:@"Requesting location authorization: when in use"];
+                    NSLog(@"Requesting location authorization: when in use");
                 }
             }
         }
@@ -87,11 +88,9 @@
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsDictionary:posError];
             [self.commandDelegate sendPluginResult:result callbackId:callbackId];
         }
-        self.locationRequestCallbackId = command.callbackId;
         CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
         [pluginResult setKeepCallback:[NSNumber numberWithBool:YES]];
-
-        [self.commandDelegate sendPluginResult:pluginResult callbackId:locationRequestCallbackId];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
     }];
 }
 
